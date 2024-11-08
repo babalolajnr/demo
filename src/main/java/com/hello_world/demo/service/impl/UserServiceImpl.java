@@ -2,13 +2,14 @@ package com.hello_world.demo.service.impl;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.hello_world.demo.model.dto.LoginRequest;
 import com.hello_world.demo.model.dto.RegisterRequest;
 import com.hello_world.demo.model.entity.User;
 import com.hello_world.demo.repository.UserRepository;
 import com.hello_world.demo.service.JwtService;
 import com.hello_world.demo.service.UserService;
+import com.hello_world.demo.exception.InvalidCredentialsException;
+import com.hello_world.demo.exception.EntityAlreadyExistsException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with email " + request.getEmail() + " already exists");
+            throw new EntityAlreadyExistsException("User", "email", request.getEmail());
         }
 
         userRepository.save(User.builder().name(request.getName()).email(request.getEmail())
@@ -32,13 +33,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User with email " + request.getEmail() + " not found"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email/password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidCredentialsException("Invalid email/password");
         }
 
         return jwtService.generateToken(user);
     }
-
 }
