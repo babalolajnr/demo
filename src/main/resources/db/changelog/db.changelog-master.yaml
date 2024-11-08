@@ -1,0 +1,130 @@
+databaseChangeLog:
+  - changeSet:
+      id: "1"
+      author: babalolajnr
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+  - changeSet:
+      id: "2"
+      author: babalolajnr
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - tableExists:
+            tableName: users
+      changes:
+        - createIndex:
+            indexName: idx_users_email
+            tableName: users
+            columns:
+              - column:
+                  name: email
+  - changeSet:
+      id: "3"
+      author: babalolajnr
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - and:
+            - tableExists:
+                tableName: users
+            - not:
+                - tableExists:
+                    tableName: posts
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - createTable:
+            tableName: posts
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: slug
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: content
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: posts
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_posts_users
+            onDelete: CASCADE
+            onUpdate: CASCADE
+        - createIndex:
+            indexName: idx_posts_slug
+            tableName: posts
+            columns:
+              - column:
+                  name: slug

@@ -1,0 +1,28 @@
+@host={{BASE_URL}}/v1/auth
+
+{{+
+    exports.headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+}}
+
+### Login
+POST /login
+...headers
+
+{
+    "email": "test@test.com",
+    "password": "test"
+}
+
+### Register
+POST /register
+...headers
+
+{
+    "name": "",
+    "email": "test@gmail.com",
+    "password": "password"
+}
+    
